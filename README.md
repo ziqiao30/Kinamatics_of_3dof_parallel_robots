@@ -1,8 +1,8 @@
 # Mozart_Kinamatics
 
-0 introduction
+## Introduction
 
-1 Installation and setup
+## Installation and setup
 
 Ensure that the [ArduinoEigenDense](https://github.com/hideakitai/ArduinoEigen) library is correctly installed and integrated into your development environment.
 
