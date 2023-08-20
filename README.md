@@ -8,29 +8,54 @@ The RobotControl library is a specialized tool designed for kinematic operations
 Before using this library, please ensure that the [ArduinoEigenDense](https://github.com/hideakitai/ArduinoEigen) library is correctly installed and integrated into your development environment.
 
 ## Member Variables:
-r: Represents the distance between the center of the base and the hinge of a leg. Default value is 0.04406.
-l: Represents the length of a robot leg. Default value is 0.0594.
-legconfig: A vector storing the configuration of the robot's legs. Default values are {0, 2 * M_PI / 3, 4 * M_PI / 3}.
+- `r`: Represents the distance between the center of the base and the hinge of a leg. 
+  - **Default**: `0.04406`
+- `l`: Represents the length of a robot leg. 
+  - **Default**: `0.0594`
+- `legconfig`: A vector storing the configuration of the robot's legs. 
+  - **Default**: `{0, 2 * M_PI / 3, 4 * M_PI / 3}`
 
 ## Functions
 
 
-### Forward Kinematics
-Inputs:
-theta: A vector containing the current angles of the motors.
-Output:
-Returns a vector with five elements. The first three elements represent the robot's position in 3D space, and the last two elements represent its orientation angles.
-Purpose:
-Given the current motor angles, this function computes the position and orientation of the robot in 3D space.
-  
-### Inverse Kinematics
-Inputs:
-delta: Desired angle in degrees.
-psi: Desired inclination angle in degrees.
-r0: Desired height or distance of the robot from the ground.
-Output:
-Returns a referencemotorangle structure containing the calculated motor angles for the three motors.
-Purpose:
-This function calculates the motor angles required to achieve a specific position and orientation for the robot.
+#### **1. Inverse_kinematics**:
+  - **Inputs**:
+    - `delta`: Desired angle in degrees.
+    - `psi`: Desired inclination angle in degrees.
+    - `r0`: Desired height or distance of the robot from the ground.
+  - **Output**:
+    - Returns a `referencemotorangle` structure containing the calculated motor angles for the three motors.
+  - **Purpose**:
+    - Calculates the motor angles required to achieve a specific position and orientation for the robot.
 
+#### **2. forwardkinematics**:
+  - **Inputs**:
+    - `theta`: A vector containing the current angles of the motors.
+  - **Output**:
+    - Returns a vector with five elements. The first three elements represent the robot's position in 3D space, and the last two elements represent its orientation angles.
+  - **Purpose**:
+    - Computes the position and orientation of the robot in 3D space given the current motor angles.
+## **Usage Example**
+
+To utilize the `RobotControl` library, follow the steps below:
+
+1. **Include the Library**:
+   ```cpp
+   #include "RobotControl.h"
+2. **Initialize an Object**:
+   RobotControl robot;
+3. **Set Desired Parameters**:
+   robot.r = 0.045;
+   robot.l = 0.060;
+   robot.legconfig << M_PI/4, M_PI/2, 3*M_PI/4;
+
+4. **Compute Inverse Kinematics**:
+   RobotControl::referencemotorangle refAngles = robot.Inverse_kinematics(30.0, 45.0, 0.05);
+5. **Compute Forward Kinematics**:
+   Eigen::VectorXd theta(3);
+   theta << M_PI/6, M_PI/4, M_PI/3;
+   Eigen::VectorXd result = robot.forwardkinematics(theta);
+6. **Process Results**:
+  Use the results from the kinematic functions in your robotic application as needed.
 ## Contact person
+ziqiao wang (ziqiao.wang@epfl.ch)
