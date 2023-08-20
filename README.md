@@ -1,18 +1,19 @@
-# Mozart_Kinamatics
+# Mozart_Actuation_Control
 
-## Introduction
+## About this repository
+The high-level control function for the single robot control.
 
-## Installation and setup
+##Installation and setup
 
-Ensure that the [ArduinoEigenDense](https://github.com/hideakitai/ArduinoEigen) library is correctly installed and integrated into your development environment.
+Before using this library, please ensure that the [ArduinoEigenDense](https://github.com/hideakitai/ArduinoEigen) library is correctly installed and integrated into your development environment.
 
-2 Manipulator Kinematics
+## Manipulator Kinematics
 
 
-  Forward Kinematics
+ ### Forward Kinematics
 
   
-  Inverse Kinematics
+### Inverse Kinematics
 
 
-Contact person
+## Contact person
