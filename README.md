@@ -43,19 +43,23 @@ To utilize the `RobotControl` library, follow the steps below:
    ```cpp
    #include "RobotControl.h"
 2. **Initialize an Object**:
+   ```cpp
    RobotControl robot;
-3. **Set Desired Parameters**:
+4. **Set Desired Parameters**:
+   ```cpp
    robot.r = 0.045;
    robot.l = 0.060;
    robot.legconfig << M_PI/4, M_PI/2, 3*M_PI/4;
 
-4. **Compute Inverse Kinematics**:
+6. **Compute Inverse Kinematics**:
+   ```cpp
    RobotControl::referencemotorangle refAngles = robot.Inverse_kinematics(30.0, 45.0, 0.05);
-5. **Compute Forward Kinematics**:
+8. **Compute Forward Kinematics**:
+   ```cpp
    Eigen::VectorXd theta(3);
    theta << M_PI/6, M_PI/4, M_PI/3;
    Eigen::VectorXd result = robot.forwardkinematics(theta);
-6. **Process Results**:
+10. **Process Results**:
   Use the results from the kinematic functions in your robotic application as needed.
 ## Contact person
 ziqiao wang (ziqiao.wang@epfl.ch)
