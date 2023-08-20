@@ -46,6 +46,7 @@ To utilize the `RobotControl` library, follow the steps below:
    ```cpp
    RobotControl robot;
 4. **Set Desired Parameters**:
+   If the robots configration is different than the default values, then:
    ```cpp
    robot.r = 0.045;
    robot.l = 0.060;
