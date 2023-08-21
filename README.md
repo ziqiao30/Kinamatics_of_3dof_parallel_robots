@@ -17,6 +17,7 @@ Before using this library, please ensure that the [ArduinoEigenDense](https://gi
 
 ## Functions
 
+![figkinematics](https://github.com/ziqiao30/Kinamatics_of_3dof_parallel_robots/assets/91966261/8ab49c05-d993-4059-83f7-2e15b44084a9)
 
 #### **1. Inverse_kinematics**:
   - **Inputs**:
