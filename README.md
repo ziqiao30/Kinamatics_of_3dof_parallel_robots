@@ -8,8 +8,7 @@ The RobotControl library is a specialized tool designed for kinematic operations
 Before using this library, please ensure that the [ArduinoEigenDense](https://github.com/hideakitai/ArduinoEigen) library is correctly installed and integrated into your development environment.
 
 ## Member Variables:
-- `r`: Represents the distance between the center of the base and the hinge of a leg (exp:O_BB_1=O_BB_2=O_BB_3
-- ). 
+- `r`: Represents the distance between the center of the base and the hinge of a leg (exp:O_BB_1=O_BB_2=O_BB_3). 
   - **Default**: `0.04406`
 - `l`: Represents the length of a robot leg. 
   - **Default**: `0.0594`
