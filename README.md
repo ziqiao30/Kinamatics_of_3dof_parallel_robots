@@ -21,9 +21,9 @@ Before using this library, please ensure that the [ArduinoEigenDense](https://gi
 
 #### **1. Inverse_kinematics**:
   - **Inputs**:
-    - `delta`: Desired angle in degrees.
-    - `psi`: Desired inclination angle in degrees.
-    - `r0`: Desired height or distance of the robot from the ground.
+    - `delta`: Desired azimuth angle for top surface norm vector in degrees.
+    - `psi`: Desired inclination angle for top surface norm vector in degrees.
+    - `r0`: Desired height of the top surface's center from the ground.
   - **Output**:
     - Returns a `referencemotorangle` structure containing the calculated motor angles for the three motors.
   - **Purpose**:
