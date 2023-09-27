@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 #include <Eigen.h>
-
+#include <math.h>
 // Class to manage the robot's kinematic operations
 class RobotControl {
 public:
