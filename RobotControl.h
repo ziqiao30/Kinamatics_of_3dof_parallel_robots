@@ -2,8 +2,11 @@
 #define ROBOTCONTROL_H
 
 #include <Arduino.h>
-#include <Eigen.h>
 #include <math.h>
+#include <ArduinoEigenDense.h>
+using namespace Eigen;
+
+
 // Class to manage the robot's kinematic operations
 class RobotControl {
 public:

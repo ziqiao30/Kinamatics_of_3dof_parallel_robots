@@ -4,7 +4,7 @@ RobotControl::RobotControl() : r(0.04406), l(0.0594) {
     legconfig << 0, 2 * M_PI / 3, 4 * M_PI / 3;
 }
 
-referencemotorangle RobotControl::Inverse_kinematics(float delta, float psi, float r0) {
+RobotControl::referencemotorangle RobotControl::Inverse_kinematics(float delta, float psi, float r0) {
     referencemotorangle refangle;
     const double eps = 1e-8;
 
