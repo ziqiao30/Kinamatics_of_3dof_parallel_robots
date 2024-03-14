@@ -28,7 +28,8 @@ RobotControl::referencemotorangle RobotControl::Inverse_kinematics(float delta, 
         double root = b * b - 4 * a * c;
         
         if (root >= 0) {
-            phi[0] = phi[1] = (-b + sqrt(root)) / (2 * a);
+            phi[0] = (-b + sqrt(root)) / (2 * a);
+            phi[1] = (-b - sqrt(root)) / (2 * a);
             for (int j = 0; j < 2; j++) {
                 phi[j] = 2 * atan2(phi[j], 1);
                 // if (phi[j] > lower_limits[i] - eps && phi[j] < upper_limits[i] + eps) {
