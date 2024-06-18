@@ -5,6 +5,7 @@
 #include <math.h>
 #include <ArduinoEigenDense.h>
 using namespace Eigen;
+extern void serialMsg(const char * msg);
 
 
 // Class to manage the robot's kinematic operations
@@ -15,9 +16,10 @@ public:
     
     // Structure to store the reference motor angles
     struct referencemotorangle {
-        uint16_t motor1;
-        uint16_t motor2;
-        uint16_t motor3;
+        float motor1; //Changed from uint16_t
+        float motor2;
+        float motor3;
+        bool valid_solution;
     };
 
     // Function to compute the inverse kinematics given the desired position

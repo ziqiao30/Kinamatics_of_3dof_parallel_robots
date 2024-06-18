@@ -33,15 +33,29 @@ RobotControl::referencemotorangle RobotControl::Inverse_kinematics(float delta, 
             phi[0] = phi[1] = (-b + sqrt(root)) / (2 * a);
             for (int j = 0; j < 2; j++) {
                 phi[j] = 2 * atan2(phi[j], 1);
-                if (phi[j] > lower_limits[i] - eps && phi[j] < upper_limits[i] + eps) {
-                    sols[i] = round(phi[j] * 180 / M_PI);
+                // if (phi[j] > lower_limits[i] - eps && phi[j] < upper_limits[i] + eps) {
+                //     sols[i] = (phi[j] * 180) / M_PI; //removed round
+                // }
+                if (phi[j] < lower_limits[i] - eps) {
+                    sols[i] = (lower_limits[i] * 180) / M_PI;
+                    //serialMsg("Inverse Kinematics.Error - Lower Limits exceeded. Set to lower limit");
+                }
+                else if(phi[j] > upper_limits[i] + eps){
+                    sols[i] = (upper_limits[i] * 180) / M_PI;
+                    //serialMsg("Inverse Kinematics.Error - Upper Limits exceeded. Set to upper limit");
+                }
+                else{
+                    sols[i] = (phi[j] * 180) / M_PI; //removed round
                 }
             }
-        } else {
-            Serial.print("no real solution for current reference workpoint\\n");
+            refangle.valid_solution = true;
+        } 
+        else {
+            serialMsg("Inverse Kinematics.Error - no real solution for current reference workpoint");
+            refangle.valid_solution = false;
         }
     }
-    
+    //Returns angles in degrees
     refangle.motor1 = sols[0];
     refangle.motor2 = sols[1];
     refangle.motor3 = sols[2];
