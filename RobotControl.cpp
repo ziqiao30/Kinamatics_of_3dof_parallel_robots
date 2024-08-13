@@ -8,9 +8,7 @@ RobotControl::referencemotorangle RobotControl::Inverse_kinematics(float delta, 
     referencemotorangle refangle;
     const double eps = 1e-8;
 
-    // Convert the deg to rad
-    delta *= (M_PI / 180);
-    psi *= (M_PI / 180);
+    //Conversion removed. Inverse kinemeatics now expects Rad
     
     // Adjust psi and r0 values
     psi /= 2;
@@ -55,10 +53,10 @@ RobotControl::referencemotorangle RobotControl::Inverse_kinematics(float delta, 
             refangle.valid_solution = false;
         }
     }
-    //Returns angles in degrees
-    refangle.motor1 = sols[0];
-    refangle.motor2 = sols[1];
-    refangle.motor3 = sols[2];
+    //Returns angles in radians
+    refangle.motor1 = sols[0] * M_PI /180;
+    refangle.motor2 = sols[1] * M_PI /180;
+    refangle.motor3 = sols[2] * M_PI /180;
     return refangle;
 }
 
