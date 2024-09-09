@@ -20,6 +20,7 @@ public:
         float motor2;
         float motor3;
         bool valid_solution;
+        bool multiple_solutions = false;
     };
 
     // Function to compute the inverse kinematics given the desired position

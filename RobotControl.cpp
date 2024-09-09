@@ -17,8 +17,9 @@ RobotControl::referencemotorangle RobotControl::Inverse_kinematics(float delta, 
     // Define angle limits and other constants
     double lower_limits[3] = {M_PI_2 / 3, M_PI_2 / 3, M_PI_2 / 3};
     double upper_limits[3] = {M_PI_2, M_PI_2, M_PI_2};
-    double sols[3];
+    double sols[2][3];
     double phi[2] = {0, 0};
+    bool valid_sol[2]= {false};
 
     // Calculate motor angles
     for (int i = 0; i < 3; i++) {
@@ -32,32 +33,30 @@ RobotControl::referencemotorangle RobotControl::Inverse_kinematics(float delta, 
             phi[1] = (-b - sqrt(root)) / (2 * a);
             for (int j = 0; j < 2; j++) {
                 phi[j] = 2 * atan2(phi[j], 1);
-                // if (phi[j] > lower_limits[i] - eps && phi[j] < upper_limits[i] + eps) {
-                //     sols[i] = (phi[j] * 180) / M_PI; //removed round
-                // }
-                if (phi[j] < lower_limits[i] - eps) {
-                    sols[i] = (lower_limits[i] * 180) / M_PI;
-                    //serialMsg("Inverse Kinematics.Error - Lower Limits exceeded. Set to lower limit");
-                }
-                else if(phi[j] > upper_limits[i] + eps){
-                    sols[i] = (upper_limits[i] * 180) / M_PI;
-                    //serialMsg("Inverse Kinematics.Error - Upper Limits exceeded. Set to upper limit");
-                }
-                else{
-                    sols[i] = (phi[j] * 180) / M_PI; //removed round
+                if (phi[j] > lower_limits[i] - eps && phi[j] < upper_limits[i] + eps) {
+                    sols[j][i] = (phi[j] * 180) / M_PI;
+                    valid_sol[j] = true;
                 }
             }
-            refangle.valid_solution = true;
         } 
         else {
             serialMsg("Inverse Kinematics.Error - no real solution for current reference workpoint");
             refangle.valid_solution = false;
         }
     }
+    if((valid_sol[0] == valid_sol[1]) && (valid_sol[0] == true)){
+        refangle.multiple_solutions = true;
+    }
+    for(int s = 0; s < sizeof(valid_sol)/sizeof(valid_sol[0]); s++){
+        if(valid_sol[s] == true){
+            refangle.motor1 = sols[s][0] * M_PI /180;
+            refangle.motor2 = sols[s][1] * M_PI /180;
+            refangle.motor3 = sols[s][2] * M_PI /180;
+            refangle.valid_solution = true;
+        }
+    }
+
     //Returns angles in radians
-    refangle.motor1 = sols[0] * M_PI /180;
-    refangle.motor2 = sols[1] * M_PI /180;
-    refangle.motor3 = sols[2] * M_PI /180;
     return refangle;
 }
 
