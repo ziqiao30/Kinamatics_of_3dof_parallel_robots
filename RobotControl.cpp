@@ -34,7 +34,7 @@ RobotControl::referencemotorangle RobotControl::Inverse_kinematics(float delta, 
             for (int j = 0; j < 2; j++) {
                 phi[j] = 2 * atan2(phi[j], 1);
                 if (phi[j] > lower_limits[i] - eps && phi[j] < upper_limits[i] + eps) {
-                    sols[j][i] = (phi[j] * 180) / M_PI;
+                    sols[j][i] = phi[j];
                     valid_sol[j] = true;
                 }
             }
@@ -49,9 +49,9 @@ RobotControl::referencemotorangle RobotControl::Inverse_kinematics(float delta, 
     }
     for(int s = 0; s < sizeof(valid_sol)/sizeof(valid_sol[0]); s++){
         if(valid_sol[s] == true){
-            refangle.motor1 = sols[s][0] * M_PI /180;
-            refangle.motor2 = sols[s][1] * M_PI /180;
-            refangle.motor3 = sols[s][2] * M_PI /180;
+            refangle.motor1 = sols[s][0];
+            refangle.motor2 = sols[s][1];
+            refangle.motor3 = sols[s][2];
             refangle.valid_solution = true;
         }
     }
