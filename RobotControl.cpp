@@ -15,14 +15,14 @@ RobotControl::referencemotorangle RobotControl::Inverse_kinematics(float delta, 
     r0 /= sin(M_PI / 2 - psi);
     
     // Define angle limits and other constants
-    double lower_limits[3] = {M_PI_2 / 3, M_PI_2 / 3, M_PI_2 / 3};
-    double upper_limits[3] = {M_PI_2, M_PI_2, M_PI_2};
-    double sols[2][3];
-    double phi[2] = {0, 0};
-    bool valid_sol[2]= {false};
+    double lower_limits[N_MOTOR] = {M_PI_2 / 3, M_PI_2 / 3, M_PI_2 / 3};
+    double upper_limits[N_MOTOR] = {M_PI_2, M_PI_2, M_PI_2};
+    double sols[N_MOTOR][N_SQRT_SOL];
+    double phi[N_SQRT_SOL] = {0, 0};
+    bool valid_sol[N_MOTOR][N_SQRT_SOL] = {false};
 
     // Calculate motor angles
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < N_MOTOR; i++) {
         double a = (r - l) * (sin(psi) * cos(delta - legconfig(i))) - (r0 / 2);
         double b = 2 * l * cos(psi);
         double c = (r + l) * (sin(psi) * cos(delta - legconfig(i))) - (r0 / 2);
@@ -31,11 +31,11 @@ RobotControl::referencemotorangle RobotControl::Inverse_kinematics(float delta, 
         if (root >= 0) {
             phi[0] = (-b + sqrt(root)) / (2 * a);
             phi[1] = (-b - sqrt(root)) / (2 * a);
-            for (int j = 0; j < 2; j++) {
+            for (int j = 0; j < 2; j++){
                 phi[j] = 2 * atan2(phi[j], 1);
-                if (phi[j] > lower_limits[i] - eps && phi[j] < upper_limits[i] + eps) {
-                    sols[j][i] = phi[j];
-                    valid_sol[j] = true;
+                if(phi[j] > lower_limits[i] - eps && phi[j] < upper_limits[i] + eps){
+                    sols[i][j] = phi[j];
+                    valid_sol[i][j] = true;
                 }
             }
         } 
@@ -43,16 +43,17 @@ RobotControl::referencemotorangle RobotControl::Inverse_kinematics(float delta, 
             serialMsg("Inverse Kinematics.Error - no real solution for current reference workpoint");
             refangle.valid_solution = false;
         }
+        if((valid_sol[i][0] == valid_sol[i][1]) && (valid_sol[i][0] == true)){
+            serialMsg("Inverse Kinematics.Error - mutliple real solutions found for motor.");
+            refangle.multiple_solutions = true;
+        }
     }
-    if((valid_sol[0] == valid_sol[1]) && (valid_sol[0] == true)){
-        refangle.multiple_solutions = true;
-    }
-    for(int s = 0; s < sizeof(valid_sol)/sizeof(valid_sol[0]); s++){
-        if(valid_sol[s] == true){
-            refangle.motor1 = sols[s][0];
-            refangle.motor2 = sols[s][1];
-            refangle.motor3 = sols[s][2];
-            refangle.valid_solution = true;
+
+    for (int i = 0; i < N_MOTOR; i++) {
+        for(int s = 0; s < N_SQRT_SOL; s++){
+            if(valid_sol[i][s] == true){
+                refangle.motors[i] = sols[i][s];
+            }
         }
     }
 

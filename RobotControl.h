@@ -7,6 +7,9 @@
 using namespace Eigen;
 extern void serialMsg(const char * msg);
 
+#define N_MOTOR 3
+#define N_SQRT_SOL 2
+
 
 // Class to manage the robot's kinematic operations
 class RobotControl {
@@ -16,9 +19,7 @@ public:
     
     // Structure to store the reference motor angles
     struct referencemotorangle {
-        float motor1; //Changed from uint16_t
-        float motor2;
-        float motor3;
+        float motors[N_MOTOR] = {0.0};
         bool valid_solution;
         bool multiple_solutions = false;
     };
