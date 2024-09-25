@@ -15,11 +15,11 @@ RobotControl::referencemotorangle RobotControl::Inverse_kinematics(float delta, 
     r0 /= sin(M_PI / 2 - psi);
     
     // Define angle limits and other constants
-    double lower_limits[N_MOTOR] = {M_PI_2 / 3, M_PI_2 / 3, M_PI_2 / 3};
+    double lower_limits[N_MOTOR] = {0, 0, 0};
     double upper_limits[N_MOTOR] = {M_PI_2, M_PI_2, M_PI_2};
     double sols[N_MOTOR][N_SQRT_SOL];
-    double phi[N_SQRT_SOL] = {0, 0};
-    bool valid_sol[N_MOTOR][N_SQRT_SOL] = {false};
+    double phi[N_SQRT_SOL] = {0,0};
+    bool valid_sol[N_MOTOR][N_SQRT_SOL] = {{false,false},{false,false},{false,false}};
 
     // Calculate motor angles
     for (int i = 0; i < N_MOTOR; i++) {
@@ -31,7 +31,7 @@ RobotControl::referencemotorangle RobotControl::Inverse_kinematics(float delta, 
         if (root >= 0) {
             phi[0] = (-b + sqrt(root)) / (2 * a);
             phi[1] = (-b - sqrt(root)) / (2 * a);
-            for (int j = 0; j < 2; j++){
+            for (int j = 0; j < N_SQRT_SOL; j++){
                 phi[j] = 2 * atan2(phi[j], 1);
                 if(phi[j] > lower_limits[i] - eps && phi[j] < upper_limits[i] + eps){
                     sols[i][j] = phi[j];
@@ -40,12 +40,24 @@ RobotControl::referencemotorangle RobotControl::Inverse_kinematics(float delta, 
             }
         } 
         else {
-            serialMsg("Inverse Kinematics.Error - no real solution for current reference workpoint");
+            //serialMsg("Inverse Kinematics.Error - no real solution for current reference workpoint");
             refangle.valid_solution = false;
         }
-        if((valid_sol[i][0] == valid_sol[i][1]) && (valid_sol[i][0] == true)){
-            serialMsg("Inverse Kinematics.Error - mutliple real solutions found for motor.");
+        if((valid_sol[i][0]) && (valid_sol[i][1])){
             refangle.multiple_solutions = true;
+        }
+        if((!valid_sol[i][0]) && (!valid_sol[i][1])){
+            refangle.valid_solution = false;
+        }
+    }
+
+    if(refangle.valid_solution){
+        if(refangle.multiple_solutions){
+            for(int motor =0; motor< N_MOTOR; motor ++){
+                char log_message_buffer [500];
+                sprintf(log_message_buffer, "mutliple real solutions found for Motor:%i Delta:%f, Psi:%f, R0:%f Solutions:%f,  %f\n", motor, delta*RAD_TO_DEG, psi*RAD_TO_DEG, r0, sols[motor][0] * RAD_TO_DEG, sols[motor][1] * RAD_TO_DEG);
+                serialMsg(log_message_buffer);
+            }
         }
     }
 

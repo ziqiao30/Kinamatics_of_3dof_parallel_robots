@@ -10,7 +10,6 @@ extern void serialMsg(const char * msg);
 #define N_MOTOR 3
 #define N_SQRT_SOL 2
 
-
 // Class to manage the robot's kinematic operations
 class RobotControl {
 public:
@@ -20,7 +19,7 @@ public:
     // Structure to store the reference motor angles
     struct referencemotorangle {
         float motors[N_MOTOR] = {0.0};
-        bool valid_solution;
+        bool valid_solution = true;
         bool multiple_solutions = false;
     };
 
