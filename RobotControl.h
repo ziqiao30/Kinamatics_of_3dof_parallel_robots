@@ -18,7 +18,7 @@ public:
     
     // Structure to store the reference motor angles
     struct referencemotorangle {
-        float motors[N_MOTOR] = {0.0};
+        float motors[N_MOTOR] = {0.0, 0.0, 0.0};
         bool valid_solution = true;
         bool multiple_solutions = false;
     };
