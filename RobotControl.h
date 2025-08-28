@@ -10,6 +10,9 @@ extern void serialMsg(const char * msg);
 #define N_MOTOR 3
 #define N_SQRT_SOL 2
 
+#define RADIUS_HEXAGON_ENSCRIBED_CIRCLE 0.04401
+#define LEG_LENGTH 0.150
+
 // Class to manage the robot's kinematic operations
 class RobotControl {
 public:
@@ -31,7 +34,8 @@ public:
 
 private:
     // Robot parameters
-    double r, l;
+    double radius;
+    double half_leg_length;
 
     // Configuration for the robot legs
     Eigen::Vector3d legconfig;
