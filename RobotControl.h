@@ -18,6 +18,7 @@ class RobotControl {
 public:
     // Constructor
     RobotControl();
+    RobotControl(const Eigen::Vector3d& custom_legconfig, double leg_radius, double half_leg_length);
     
     // Structure to store the reference motor angles
     struct referencemotorangle {

@@ -4,6 +4,12 @@
 //     legconfig << 0, 2 * M_PI / 3, 4 * M_PI / 3;
 // }
 
+RobotControl::RobotControl(const Eigen::Vector3d& custom_legconfig, double leg_radius, double half_leg_length)
+    : radius(leg_radius), half_leg_length(half_leg_length) {
+    legconfig = custom_legconfig;
+}
+
+
 RobotControl::RobotControl() : radius(RADIUS_HEXAGON_ENSCRIBED_CIRCLE), half_leg_length(LEG_LENGTH / 2) {
     legconfig << 0, 2 * M_PI / 3, 4 * M_PI / 3;
 }
