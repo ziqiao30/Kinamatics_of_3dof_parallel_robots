@@ -1,6 +1,16 @@
 #include "RobotControl.h"
 
-RobotControl::RobotControl() : r(0.04406), l(0.0594) {
+// RobotControl::RobotControl() : r(0.04406), l(0.0594) {
+//     legconfig << 0, 2 * M_PI / 3, 4 * M_PI / 3;
+// }
+
+RobotControl::RobotControl(const Eigen::Vector3d& custom_legconfig, double leg_radius, double half_leg_length)
+    : radius(leg_radius), half_leg_length(half_leg_length) {
+    legconfig = custom_legconfig;
+}
+
+
+RobotControl::RobotControl() : radius(RADIUS_HEXAGON_ENSCRIBED_CIRCLE), half_leg_length(LEG_LENGTH / 2) {
     legconfig << 0, 2 * M_PI / 3, 4 * M_PI / 3;
 }
 
@@ -23,9 +33,9 @@ RobotControl::referencemotorangle RobotControl::Inverse_kinematics(float delta, 
 
     // Calculate motor angles
     for (int i = 0; i < N_MOTOR; i++) {
-        double a = (r - l) * (sin(psi) * cos(delta - legconfig(i))) - (r0 / 2);
-        double b = 2 * l * cos(psi);
-        double c = (r + l) * (sin(psi) * cos(delta - legconfig(i))) - (r0 / 2);
+        double a = (radius - half_leg_length) * (sin(psi) * cos(delta - legconfig(i))) - (r0 / 2);
+        double b = 2 * half_leg_length * cos(psi);
+        double c = (radius + half_leg_length) * (sin(psi) * cos(delta - legconfig(i))) - (r0 / 2);
         double root = b * b - 4 * a * c;
         
         if (root >= 0) {
@@ -78,15 +88,15 @@ Eigen::VectorXd RobotControl::forwardkinematics(Eigen::VectorXd theta) {
 
     // Define constants for calculation
     Eigen::Vector3d b1, b2, b3;
-    b1 << cos(legconfig(0)) * (r + l * cos(theta(0))),
-          sin(legconfig(0)) * (r + l * cos(theta(0))), 
-          l * sin(theta(0));
-    b2 << cos(legconfig(1)) * (r + l * cos(theta(1))),
-          sin(legconfig(1)) * (r + l * cos(theta(1))), 
-          l * sin(theta(1));
-    b3 << cos(legconfig(2)) * (r + l * cos(theta(2))),
-          sin(legconfig(2)) * (r + l * cos(theta(2))), 
-          l * sin(theta(2));
+    b1 << cos(legconfig(0)) * (radius + half_leg_length * cos(theta(0))),
+          sin(legconfig(0)) * (radius + half_leg_length * cos(theta(0))), 
+          half_leg_length * sin(theta(0));
+    b2 << cos(legconfig(1)) * (radius + half_leg_length * cos(theta(1))),
+          sin(legconfig(1)) * (radius + half_leg_length * cos(theta(1))), 
+          half_leg_length * sin(theta(1));
+    b3 << cos(legconfig(2)) * (radius + half_leg_length * cos(theta(2))),
+          sin(legconfig(2)) * (radius + half_leg_length * cos(theta(2))), 
+          half_leg_length * sin(theta(2));
 
     // Compute normal vector (N) and its distance (d)
     Eigen::Vector3d N = (b1 - b2).cross(b1 - b3);
