@@ -101,13 +101,183 @@ Eigen::VectorXd RobotControl::forwardkinematics(Eigen::VectorXd theta) {
     // Compute normal vector (N) and its distance (d)
     Eigen::Vector3d N = (b1 - b2).cross(b1 - b3);
     double d = (b1 - Eigen::Vector3d::Zero()).dot(N) / N.norm();
-    Eigen::Vector3d pos = 2 * d * N / N.norm();
 
     // Calculate the rotation angle for the top plane's norm vector
-    N.normalize();
-    double alpha = atan2(N(1), N(0)) + M_PI;
-    double beta = 2 * asin(sqrt(N(0) * N(0) + N(1) * N(1)));
+    Eigen::Vector3d n_hat = N.normalized();
+    if (n_hat.z() < 0){ //Ensure the normal vector is pointing upwards
+        n_hat = -n_hat;
+        d = -d;
+    }
 
-    result << pos(0), pos(1), pos(2), alpha, beta;
+    Eigen::Vector3d pos = 2 * d * n_hat;
+
+    double delta = atan2(n_hat(1), n_hat(0));
+    double psi = 2 * asin(sqrt(n_hat(0) * n_hat(0) + n_hat(1) * n_hat(1)));
+
+    result << pos(0), pos(1), pos(2), delta, psi;
     return result;
+}
+
+RobotControl::differentialKinematics RobotControl::computeDifferentialKinematicsPose(Eigen::VectorXd theta, Eigen::Vector3d theta_dot){
+
+    //given the position and velocity of the motor angles, compute the rate of change of the pose
+
+    //Compute the position of the joints
+    Eigen::Vector3d b1, b2, b3;
+    b1 << cos(legconfig(0)) * (radius + half_leg_length * cos(theta(0))),
+          sin(legconfig(0)) * (radius + half_leg_length * cos(theta(0))), 
+          half_leg_length * sin(theta(0));
+    b2 << cos(legconfig(1)) * (radius + half_leg_length * cos(theta(1))),
+          sin(legconfig(1)) * (radius + half_leg_length * cos(theta(1))), 
+          half_leg_length * sin(theta(1));
+    b3 << cos(legconfig(2)) * (radius + half_leg_length * cos(theta(2))),
+          sin(legconfig(2)) * (radius + half_leg_length * cos(theta(2))), 
+          half_leg_length * sin(theta(2));
+
+    Eigen::Vector3d b1_dot, b2_dot, b3_dot;
+    b1_dot << -half_leg_length * std::cos(legconfig(0)) * std::sin(theta(0)),
+        -half_leg_length * std::sin(legconfig(0)) * std::sin(theta(0)),
+         half_leg_length * std::cos(theta(0));
+    b2_dot << -half_leg_length * std::cos(legconfig(1)) * std::sin(theta(1)),
+        -half_leg_length * std::sin(legconfig(1)) * std::sin(theta(1)),
+         half_leg_length * std::cos(theta(1));
+    b3_dot << -half_leg_length * std::cos(legconfig(2)) * std::sin(theta(2)),
+        -half_leg_length * std::sin(legconfig(2)) * std::sin(theta(2)),
+         half_leg_length * std::cos(theta(2));
+
+    Eigen::Vector3d N = (b1 - b2).cross(b1 - b3);
+    double Nnorm = N.norm();
+    Eigen::Vector3d n_hat = N / Nnorm;
+    if (n_hat.z() < 0){ //Ensure the normal vector is pointing upwards
+        n_hat = -n_hat;
+    }
+    double nx = n_hat(0), ny = n_hat(1), nz = n_hat(2);
+
+    double d = (b1 - Eigen::Vector3d::Zero()).dot(N) / N.norm();
+    double r0 = 2.0 * d;
+
+    double psi   = 2.0 * std::acos(nz);
+    double delta = std::atan2(ny, nx);
+
+    // Compute Jacobian
+    Matrix3d P = Matrix3d::Identity() - n_hat * n_hat.transpose();
+
+    // Partial derivatives of N
+    Vector3d dN1 = b1_dot.cross(b1 - b3) + (b1 - b2).cross(b1_dot);
+    Vector3d dN2 = - b2_dot.cross(b1 - b3);
+    Vector3d dN3 = - (b1 - b2).cross(b3_dot);
+
+    Vector3d dN[3] = { dN1, dN2, dN3 };
+
+    Matrix3d J;
+    J.setZero();
+
+    for (int j = 0; j < 3; ++j)
+    {
+        Vector3d dn = (P * dN[j]) / Nnorm;
+        Vector3d db1 = (j == 0 ? b1_dot : Vector3d::Zero());
+
+        // d'
+        double dd = db1.dot(n_hat) + b1.dot(dn);
+
+        // r0'
+        J(0, j) = 2.0 * dd;
+
+        // psi'
+        double denomPsi = std::sqrt(std::max(1e-12, 1.0 - nz*nz));
+        J(1, j) = -2.0 * dn(2) / denomPsi;
+
+        // delta'
+        double denomDelta = nx*nx + ny*ny;
+        if (denomDelta < 1e-12) denomDelta = 1e-12;
+        J(2, j) = (nx * dn(1) - ny * dn(0)) / denomDelta;
+    }
+
+    //Pose velocity = J * theta_dot
+    Eigen::Vector3d pose_velocity = J * theta_dot;
+
+    differentialKinematics out;
+    out.position << delta, psi, r0;
+    out.velocity = pose_velocity;
+    out.Jacobian = J;
+
+    return out;
+
+}
+
+
+RobotControl::differentialKinematics RobotControl::computeDifferentialKinematicsCartesian(Eigen::VectorXd theta, Eigen::Vector3d theta_dot){
+
+    //given the position and velocity of the motor angles, compute the rate of change of the cartesian position position of the centre of the end effector
+
+    //Compute the position of the joints
+    Eigen::Vector3d b1, b2, b3;
+    b1 << cos(legconfig(0)) * (radius + half_leg_length * cos(theta(0))),
+          sin(legconfig(0)) * (radius + half_leg_length * cos(theta(0))), 
+          half_leg_length * sin(theta(0));
+    b2 << cos(legconfig(1)) * (radius + half_leg_length * cos(theta(1))),
+          sin(legconfig(1)) * (radius + half_leg_length * cos(theta(1))), 
+          half_leg_length * sin(theta(1));
+    b3 << cos(legconfig(2)) * (radius + half_leg_length * cos(theta(2))),
+          sin(legconfig(2)) * (radius + half_leg_length * cos(theta(2))), 
+          half_leg_length * sin(theta(2));
+
+    Eigen::Vector3d b1_dot, b2_dot, b3_dot;
+    b1_dot << -half_leg_length * std::cos(legconfig(0)) * std::sin(theta(0)),
+        -half_leg_length * std::sin(legconfig(0)) * std::sin(theta(0)),
+         half_leg_length * std::cos(theta(0));
+    b2_dot << -half_leg_length * std::cos(legconfig(1)) * std::sin(theta(1)),
+        -half_leg_length * std::sin(legconfig(1)) * std::sin(theta(1)),
+         half_leg_length * std::cos(theta(1));
+    b3_dot << -half_leg_length * std::cos(legconfig(2)) * std::sin(theta(2)),
+        -half_leg_length * std::sin(legconfig(2)) * std::sin(theta(2)),
+         half_leg_length * std::cos(theta(2));
+
+    Eigen::Vector3d N = (b1 - b2).cross(b1 - b3);
+    double Nnorm = N.norm();
+    Eigen::Vector3d n_hat = N / Nnorm;
+    if (n_hat.z() < 0){ //Ensure the normal vector is pointing upwards
+        n_hat = -n_hat;
+    }
+    double nx = n_hat(0), ny = n_hat(1), nz = n_hat(2);
+
+    double d = (b1 - Eigen::Vector3d::Zero()).dot(N) / N.norm();
+    double r0 = 2.0 * d;
+    Eigen::Vector3d position = 2.0 * d * n_hat; //position of the centre of the end effector
+
+    // Compute Jacobian
+    Matrix3d P = Matrix3d::Identity() - n_hat * n_hat.transpose();
+
+    // Partial derivatives of N
+    Vector3d dN1 = b1_dot.cross(b1 - b3) + (b1 - b2).cross(b1_dot);
+    Vector3d dN2 = - b2_dot.cross(b1 - b3);
+    Vector3d dN3 = - (b1 - b2).cross(b3_dot);
+
+    Vector3d dN[3] = { dN1, dN2, dN3 };
+
+    Matrix3d J_xyz = Matrix3d::Zero();
+    for (int j = 0; j < 3; ++j) {
+        // ∂nhat = (1/N) * P * ∂N
+        Vector3d dnhat = (P * dN[j]) / Nnorm;
+
+        // ∂d = (∂b1)·nhat + b1·(∂nhat)
+        Vector3d db1 = (j == 0 ? b1_dot : Vector3d::Zero());
+        double dd = db1.dot(n_hat) + b1.dot(dnhat);
+
+        // ∂p = 2*(dd)*nhat + 2*d * dnhat
+        Vector3d dp_dth = 2.0 * dd * n_hat + 2.0 * d * dnhat;
+
+        J_xyz.col(j) = dp_dth;
+    }
+
+    //Cartesian velocity = J_xyz * theta_dot
+    Eigen::Vector3d cartesian_velocity = J_xyz * theta_dot;
+
+    differentialKinematics out;
+    out.position = position;
+    out.velocity = cartesian_velocity;
+    out.Jacobian = J_xyz;
+
+    return out;
+
 }

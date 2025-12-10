@@ -27,11 +27,21 @@ public:
         bool multiple_solutions = false;
     };
 
+    struct differentialKinematics{
+        Eigen::Vector3d position;
+        Eigen::Vector3d velocity;
+        Matrix3d Jacobian;
+    };
+
     // Function to compute the inverse kinematics given the desired position
     referencemotorangle Inverse_kinematics(float delta, float psi, float r0);
 
     // Function to compute the forward kinematics given the motor angles
     Eigen::VectorXd forwardkinematics(Eigen::VectorXd theta);
+
+    // Function to compute the Jacobian of the pose
+    differentialKinematics computeDifferentialKinematicsPose(Eigen::VectorXd theta, Eigen::Vector3d theta_dot);
+    differentialKinematics computeDifferentialKinematicsCartesian(Eigen::VectorXd theta, Eigen::Vector3d theta_dot);
 
 private:
     // Robot parameters
