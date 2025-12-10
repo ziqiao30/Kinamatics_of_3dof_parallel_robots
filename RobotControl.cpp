@@ -148,12 +148,14 @@ RobotControl::differentialKinematics RobotControl::computeDifferentialKinematics
     Eigen::Vector3d N = (b1 - b2).cross(b1 - b3);
     double Nnorm = N.norm();
     Eigen::Vector3d n_hat = N / Nnorm;
+    double sign_flip = 1.0;
     if (n_hat.z() < 0){ //Ensure the normal vector is pointing upwards
         n_hat = -n_hat;
+        sign_flip = -1.0;
     }
     double nx = n_hat(0), ny = n_hat(1), nz = n_hat(2);
 
-    double d = (b1 - Eigen::Vector3d::Zero()).dot(N) / N.norm();
+    double d = b1.dot(n_hat); // Use the (potentially flipped) n_hat for consistency
     double r0 = 2.0 * d;
 
     double psi   = 2.0 * std::acos(nz);
@@ -174,23 +176,24 @@ RobotControl::differentialKinematics RobotControl::computeDifferentialKinematics
 
     for (int j = 0; j < 3; ++j)
     {
-        Vector3d dn = (P * dN[j]) / Nnorm;
+        // ∂nhat with sign correction if n_hat was flipped
+        Vector3d dn = sign_flip * (P * dN[j]) / Nnorm;
         Vector3d db1 = (j == 0 ? b1_dot : Vector3d::Zero());
 
-        // d'
+        // d' (derivative of distance parameter)
         double dd = db1.dot(n_hat) + b1.dot(dn);
-
-        // r0'
-        J(0, j) = 2.0 * dd;
-
-        // psi'
-        double denomPsi = std::sqrt(std::max(1e-12, 1.0 - nz*nz));
-        J(1, j) = -2.0 * dn(2) / denomPsi;
 
         // delta'
         double denomDelta = nx*nx + ny*ny;
         if (denomDelta < 1e-12) denomDelta = 1e-12;
-        J(2, j) = (nx * dn(1) - ny * dn(0)) / denomDelta;
+        J(0, j) = (nx * dn(1) - ny * dn(0)) / denomDelta;
+
+        // psi' 
+        double denomPsi = std::sqrt(std::max(1e-12, 1.0 - nz*nz));
+        J(1, j) = -2.0 * dn(2) / denomPsi;
+
+        // r0' 
+        J(2, j) = 2.0 * dd;
     }
 
     //Pose velocity = J * theta_dot
@@ -236,12 +239,14 @@ RobotControl::differentialKinematics RobotControl::computeDifferentialKinematics
     Eigen::Vector3d N = (b1 - b2).cross(b1 - b3);
     double Nnorm = N.norm();
     Eigen::Vector3d n_hat = N / Nnorm;
+    double sign_flip = 1.0;
     if (n_hat.z() < 0){ //Ensure the normal vector is pointing upwards
         n_hat = -n_hat;
+        sign_flip = -1.0;
     }
     double nx = n_hat(0), ny = n_hat(1), nz = n_hat(2);
 
-    double d = (b1 - Eigen::Vector3d::Zero()).dot(N) / N.norm();
+    double d = b1.dot(n_hat); // Use the (potentially flipped) n_hat for consistency
     double r0 = 2.0 * d;
     Eigen::Vector3d position = 2.0 * d * n_hat; //position of the centre of the end effector
 
@@ -257,8 +262,8 @@ RobotControl::differentialKinematics RobotControl::computeDifferentialKinematics
 
     Matrix3d J_xyz = Matrix3d::Zero();
     for (int j = 0; j < 3; ++j) {
-        // ∂nhat = (1/N) * P * ∂N
-        Vector3d dnhat = (P * dN[j]) / Nnorm;
+        // ∂nhat = (1/N) * P * ∂N, with sign correction if n_hat was flipped
+        Vector3d dnhat = sign_flip * (P * dN[j]) / Nnorm;
 
         // ∂d = (∂b1)·nhat + b1·(∂nhat)
         Vector3d db1 = (j == 0 ? b1_dot : Vector3d::Zero());
