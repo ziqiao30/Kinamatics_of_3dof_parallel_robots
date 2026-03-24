@@ -27,7 +27,7 @@ public:
         bool multiple_solutions = false;
     };
 
-    struct differentialKinematics {
+    struct differentialKinematics{
         Eigen::Vector3d position;
         Eigen::Vector3d velocity;
         Matrix3d Jacobian;
