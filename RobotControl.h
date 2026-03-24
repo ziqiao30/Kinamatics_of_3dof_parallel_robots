@@ -5,7 +5,7 @@
 #include <math.h>
 #include <ArduinoEigenDense.h>
 using namespace Eigen;
-extern void serialMsg(const char * msg);
+extern void serialMsg(const char* msg);
 
 #define N_MOTOR 3
 #define N_SQRT_SOL 2
@@ -22,9 +22,15 @@ public:
     
     // Structure to store the reference motor angles
     struct referencemotorangle {
-        float motors[N_MOTOR] = {0.0, 0.0, 0.0};
+        float motors[N_MOTOR] = { 0.0, 0.0, 0.0 };
         bool valid_solution = true;
         bool multiple_solutions = false;
+    };
+
+    struct differentialKinematics {
+        Eigen::Vector3d position;
+        Eigen::Vector3d velocity;
+        Matrix3d Jacobian;
     };
 
     // Function to compute the inverse kinematics given the desired position
@@ -32,6 +38,10 @@ public:
 
     // Function to compute the forward kinematics given the motor angles
     Eigen::VectorXd forwardkinematics(Eigen::VectorXd theta);
+
+    // Function to compute the Jacobian of the pose
+    differentialKinematics computeDifferentialKinematicsPose(Eigen::VectorXd theta, Eigen::Vector3d theta_dot);
+    differentialKinematics computeDifferentialKinematicsCartesian(Eigen::VectorXd theta, Eigen::Vector3d theta_dot);
 
 private:
     // Robot parameters
