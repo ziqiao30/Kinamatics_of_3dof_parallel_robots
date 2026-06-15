@@ -11,7 +11,7 @@ extern void serialMsg(const char* msg);
 #define N_SQRT_SOL 2
 
 #define RADIUS_HEXAGON_ENSCRIBED_CIRCLE 0.04401
-#define LEG_LENGTH 0.150
+#define LEG_LENGTH 0.140
 
 // Class to manage the robot's kinematic operations
 class RobotControl {
