@@ -19,11 +19,13 @@ RobotControl::referencemotorangle RobotControl::Inverse_kinematics(float delta, 
     const double eps = 1e-8;
 
     //Conversion removed. Inverse kinemeatics now expects Rad
-    
-    // Adjust psi and r0 values
+    // (this refers to THIS function's arguments. callback_SetTargetByPose still converts
+    //  the host's degrees to radians before calling here.)
+
+    // (delta, psi, r0) is true polar form: r0 is the LENGTH of the end-effector position
+    // vector, |pos|, not its vertical component.
     psi /= 2;
-    r0 /= sin(M_PI / 2 - psi);
-    
+
     // Define angle limits and other constants
     double lower_limits[N_MOTOR] = {0, 0, 0};
     double upper_limits[N_MOTOR] = {M_PI_2, M_PI_2, M_PI_2};
