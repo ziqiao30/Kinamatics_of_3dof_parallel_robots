@@ -63,5 +63,26 @@ To utilize the `RobotControl` library, follow the steps below:
    Eigen::VectorXd result = robot.forwardkinematics(theta);
 10. **Process Results**:
   Use the results from the kinematic functions in your robotic application as needed.
+## Citation
+
+If you find this repository useful in your research, please consider citing our work:
+
+```bibtex
+@article{wang2026surface,
+  title   = {Surface-based manipulation with modular foldable robots},
+  author  = {Wang, Ziqiao and Demirtas, Serhat and Zuliani, Fabio and Paik, Jamie},
+  journal = {npj Robotics},
+  volume  = {4},
+  number  = {1},
+  pages   = {3},
+  year    = {2026},
+  doi     = {10.1038/s44182-025-00069-6}
+}
+```
+
+## License
+
+This project is licensed under the Apache License 2.0. See the [LICENSE](LICENSE) file for details.
+
 ## Contact person
 ziqiao wang (ziqiao.wang@epfl.ch)
